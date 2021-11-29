@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<joint>
+    <angle>a</angle>
+    <length></length>
+    <offset></offset>
+    <twist></twist>
+
+    <children>
+        <joint>
+        <angle>a</angle>
+        <length></length>
+        <offset></offset>
+        <twist></twist>
+        </joint>,
+        <joint>
+        <angle>a</angle>
+        <length></length>
+        <offset></offset>
+        <twist></twist>
+        </joint>
+    </children>
+</joint>

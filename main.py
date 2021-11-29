@@ -1,6 +1,8 @@
 import matplotlib as plt
 import numpy as np
 import math
+from robot import *
+from xml.etree import ElementTree as etree
 
 # input: Initialisierungsliste init_list = [[v_x,v_y,v_z,phi_x,phi_y,phi_z,parent, range_v_x_min,range_v_x_max, range_v_y_min,range_v_y_max, range_v_z_min,range_v_z_max, range_phi_x_min,range_phi_x_max,  range_phi_y_min,range_phi_y_max, range_phi_z_min,range_phi_z_max,]
 init_list = [[1,0,0,math.pi,0,0,-1, 0, 0, 0, 0, 0, 0, 0, math.pi, 0, 2, 0, 0],
@@ -122,13 +124,20 @@ def init_transformationmatrix(rotationsmatrix, tranVec):
 
 
 
+def read_xml(documentname):
+    document = etree.parse(documentname)
+    #HIER XML DATEI FORMATIERT AUSLESEN
+    for data_node in document.findall('angle'):
+       print("a")
 
 
 
 
 
-init_degree_of_freedom_list(init_list)
-
-parent_list = init_parent_list(init_list)
-
-init_kin_chains(init_list, parent_list)
+if __name__ == '__main__':
+    #init_degree_of_freedom_list(init_list)
+    #parent_list = init_parent_list(init_list)
+    #init_kin_chains(init_list, parent_list)
+    #R1 = Joint(math.pi, 14, 14, math.pi/4)
+    #R1.init_transformation_matrix_dh()
+    read_xml('config1.xml')
