@@ -3,7 +3,9 @@ import numpy as np
 import math
 
 # input: Initialisierungsliste init_list = [[v_x,v_y,v_z,phi_x,phi_y,phi_z,parent, range_v_x_min,range_v_x_max, range_v_y_min,range_v_y_max, range_v_z_min,range_v_z_max, range_phi_x_min,range_phi_x_max,  range_phi_y_min,range_phi_y_max, range_phi_z_min,range_phi_z_max,]
-init_list = [[1,0,0,math.pi,0,0,-1, 0, 0, 0, 0, 0, 0, 0, math.pi, 0, 2, 0, 0],[1,0,0,math.pi,0,0,0, 0, 0, 0, 0, 0, 0, 0, math.pi, 0, 2, 0, 0],[1,0,0,math.pi,0,0,1, 0, 0, 0, 0, 0, 0, 0, math.pi, 0, 2, 0, 0]]
+init_list = [[1,0,0,math.pi,0,0,-1, 0, 0, 0, 0, 0, 0, 0, math.pi, 0, 2, 0, 0],
+             [1,0,0,math.pi,0,0,0, 0, 0, 0, 0, 0, 0, 0, math.pi, 0, 2, 0, 0],
+             [1,0,0,math.pi,0,0,1, 0, 0, 0, 0, 0, 0, 0, math.pi, 0, 2, 0, 0]]
 
 # Inititialisierungsliste backup (für den Reset Button um Neueingabe zu verhindern)
 backup_init_list=init_list
@@ -28,7 +30,6 @@ Ebenso wird die Symbolik hierrüber deklariert.
 
 """
     #liste aus init erzeugen, mit der anzahl innere listen = anzahl  initlist, platzhalterliste erzeugen
-    len(init_list)
     degree_of_freedom_list=[[] for i in range(len(init_list))]
     for i in range(len(init_list)):
         if init_list[i][7] != 0 or init_list[i][8] != 0:
@@ -43,20 +44,59 @@ Ebenso wird die Symbolik hierrüber deklariert.
             degree_of_freedom_list[i].append(["phi_y",init_list[i][15],init_list[i][16]])
         if init_list[i][17] != 0 or init_list[i][18] != 0:
             degree_of_freedom_list[i].append(["phi_z",init_list[i][17],init_list[i][18]])
-    print(degree_of_freedom_list)
+    print("degree_of_freedom_list: ", degree_of_freedom_list)
     return
 
 """TRANSFORMATIONSMATRIZEN AUFSTELLEN
 Schritte:
-1) Welche Transformationsmatrizen müssen erzeugt werden -> init_liste über die parents
+1) Welche Transformationsmatrizen müssen erzeugt werden -> init_liste über die parents (Erkennung kinematischer Ketten)
+2) Für jedes Gelenk i muss eine Transformationsmatrix -1 bis i berechnet werden -> Einzeltransformationsmatrizen werden multipliziert
 """
+
+def init_parent_list(init_list):
+    parent_list = []
+    for i in range(len(init_list)):
+        parent_list.append(init_list[i][6])
+    print("parent_list: ", parent_list)
+    return parent_list
+
+def init_kin_chains(init_list, parent_list):
+    """
+    Eine Liste aus Listen für Gelenk 1 bis n mit der kinematischen Kette für das jeweilige Gelenk
+    bis zum Basiskoordinatensystem.
+    Bsp.: Bei einem System einer einfachen kinematischen Kette mit 3 Gelenken, die jeweils mit dem
+    Vorgaenger verbunden sind saehe die kin_chain_list wie folgt aus: [[-1][0,-1][1,0,-1]]
+                                                                      [[G1][G2  ][G3    ]]
+    (-1 ist das Basiskoordinatensystem, die anderen Zahlen beziehen sich auf den Index des Gelenks in der init_list = Parent)
+    :return:
+    """
+
+    kin_chain_list = [[] for i in range(len(init_list))]
+    for n in range(len(kin_chain_list)):
+        tmp_parent = n
+        while parent_list[tmp_parent] != -1:
+            kin_chain_list[n] = [(parent_list[tmp_parent]), *kin_chain_list[n]]
+            tmp_parent = parent_list[tmp_parent]
+
+        kin_chain_list[n].append(n)
+        kin_chain_list[n] = [-1,*kin_chain_list[n]]
+    print("kin_chain_list: ", kin_chain_list)
+    return kin_chain_list
 
 def init_transformationlist():
     """
-    Behandelt Schritt 1) -> Erzeugt Liste aus nötigen Transformationsmatrizen
-    :return: 
+    Erzeugt Liste aus nötigen Transformationsmatrizen, nutzt die kin_chain_list
+    (z.B. kin_chain_list:  [[-1], [0, -1], [1, 0, -1]])
+    Ziel: Liste aus nötigen Kombinationen von Transformationsmatrizen fuer
+    jedes Gelenk vom Basiskoordinatensystem -1 zum Gelenk i: T_-1_i
+
+    [ [T_-1_0] [T_-1_0, T_0_1] [T_-1_]]
+
     """
 
+
+
+    return
 
 def init_transformationmatrix(rotationsmatrix, tranVec):
     """
@@ -74,13 +114,10 @@ def init_transformationmatrix(rotationsmatrix, tranVec):
     """
     #(4D-)Einheitsmatrix
     transformationsmatrix = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]]
-
+    return
 
 #Rotationsmatrix um x-Achse
-def
 
-
-test
 
 
 
@@ -91,3 +128,7 @@ test
 
 
 init_degree_of_freedom_list(init_list)
+
+parent_list = init_parent_list(init_list)
+
+init_kin_chains(init_list, parent_list)
