@@ -1,8 +1,10 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import math
 from robot import *
 import json
+from mpl_toolkits import mplot3d
+
 
 #Datei auslesen und als Dictionary abspeichern
 def jsontoDic(file_name):
@@ -119,7 +121,7 @@ def init_transformationmatrix_dh(id):
 def init_chain_transformationmatrix(id):
     #Segment aus kin_chain_list abhaengig von ID
     piece_kin_chain_list=kin_chain_list[id]
-    g_T_id = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+    g_T_id = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     for i in range(1, len(piece_kin_chain_list)):
             g_T_id = np.dot(g_T_id, init_transformationmatrix_dh(piece_kin_chain_list[i]))
 
@@ -131,6 +133,9 @@ def init_entire_transformationmatrices():
     entire_T_list = [init_chain_transformationmatrix(i) for i in range(len(kin_chain_list))]
 
     return entire_T_list
+
+
+
 
 
 
@@ -150,7 +155,7 @@ if __name__ == '__main__':
     restructureDic(robot_data_dic)
     kin_chain_list = init_kin_chains()
 
-    print(f'T_id: \n {init_transformationmatrix_dh(2)[0]} \n {init_transformationmatrix_dh(2)[1]} \n {init_transformationmatrix_dh(2)[2]} \n {init_transformationmatrix_dh(2)[3]}')
+    #print(f'T_id: \n {init_transformationmatrix_dh(2)[0]} \n {init_transformationmatrix_dh(2)[1]} \n {init_transformationmatrix_dh(2)[2]} \n {init_transformationmatrix_dh(2)[3]}')
 
     #A = [[1,2,3],[4,1,3],[5,2,2]]
     #B = [[3,2,1],[2,4,3],[4,2,3]]
@@ -159,4 +164,42 @@ if __name__ == '__main__':
 
     #print(f'g_T_id = {init_chain_transformationmatrix(3)}')
 
-    print(f'entire_T = {init_entire_transformationmatrices()}')
+    entire_T = init_entire_transformationmatrices()
+    print(f'entire_T = {entire_T}')
+    A = entire_T[0]
+    print(f'A: {A}')
+
+    ursprung_punkt_show = np.array([[0], [0], [0], [1]])
+
+
+
+    # punkt_P = np.array([[0], [0], [0]])
+    # print(f'punkt_P: {punkt_P}')
+    # punkt_P_hom = np.append(punkt_P, [1])
+    # print(f'punkt_P_hom: {punkt_P_hom}')
+    # punkt_P_calc = [punkt_P_hom[0], punkt_P_hom[1], punkt_P_hom[2]]
+    # print(f'punkt_P_calc: {punkt_P_calc}')
+    #print([punkt_P[0, 0], punkt_P[1, 0], punkt_P[1, 0]])
+
+
+    # A_show = A[:3, :3]
+    # print(f'A_show:\n {A_show}')
+
+
+    punkt_P_hom = np.array([[0], [0], [0], [1]])
+    print(f'punkt_P:\n {punkt_P_hom}')
+    #punkt_P_show = punkt_P_hom[:3, :1]
+    #print(f'punkt_P_show:\n {punkt_P_show}')
+
+
+
+
+    fig = plt.figure()
+    #plt.rcParams['figure.figsize']=(8,6)
+    ax=plt.axes(projection='3d')
+    #ax.scatter3D(1,2,3)
+    #plt.plot([1, 2, 3], [1, 2, 3], 'go-', label='line 1', linewidth=2)
+    #plt.plot([punkt_P[0, 0], punkt_P[1, 0], punkt_P[1, 0]], [1, 2, 3], 'go-', label='line 1', linewidth=2)
+    #plt.plot(punkt_P_show, [1, 2, 3], 'go-', label='line 1', linewidth=2)
+    plt.show()
+
