@@ -135,7 +135,12 @@ def init_entire_transformationmatrices():
     return entire_T_list
 
 
+def points_coord_system(id):
+    ursprung_punkt_show = np.array([[0], [0], [0], [1]])
+    
 
+
+    return ursprung_punkt_show
 
 
 
@@ -169,7 +174,9 @@ if __name__ == '__main__':
     A = entire_T[0]
     print(f'A: {A}')
 
-    ursprung_punkt_show = np.array([[0], [0], [0], [1]])
+    #ursprung_punkt_show = np.array([[0], [0], [0], [1]])
+
+
 
 
 
