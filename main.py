@@ -48,19 +48,19 @@ Ziel: joints = {1: {'name': '1', 'parent': '0', 'angle': 'Winkel', 'length': '1'
 -----------------------------------------------------------------------------------------------------------------------
 
 Geg.: 
-{'robot': [{'angle': '11', 'length': '12', 'offset': '13', 'twist': '14', 'children':          (1)
-[{'angle': '111', 'length': '112', 'offset': '113', 'twist': '114', 'children':                (3)
-[{'angle': '1111', 'length': '1112', 'offset': '1113', 'twist': '1114'},                       (5)
-{'angle': '1121', 'length': '1122', 'offset': '1123', 'twist': '1124'}]},                      (6)
-{'angle': '121', 'length': '122', 'offset': '123', 'twist': '124'}]},                          (4)
-{'angle': '21', 'length': '22', 'offset': '23', 'twist': '24'}]}                               (2)
+{'robot': [{'angle': 'np.pi/2', 'length': '1.2', 'offset': '1.3', 'twist': '0', 'children':          (1)
+[{'angle': '0', 'length': '2.3', 'offset': '1', 'twist': 'np.pi', 'children':                         (3)
+[{'angle': '0', 'length': '1', 'offset': '3', 'twist': 'np.pi/4'},                                  (5)
+{'angle': '-np.pi/2', 'length': '0.5', 'offset': '2', 'twist': '0'}]},                                  (6)
+{'angle': 'np.pi/4', 'length': '1.5', 'offset': '0.2', 'twist': '-np.pi/4'}]},                          (4)
+{'angle': 'np.pi', 'length': '2.4', 'offset': '3', 'twist': '0'}]}                               (2)
 
-Ziel: joints = {1: {'name': '1', 'parent': '0', 'angle': '11', 'length': '12', 'offset': '13', 'twist': '14'},
-                2: {'name': '2', 'parent': '0', 'angle': '21', 'length': '22', 'offset': '23', 'twist': '24'},
-                3: {'name': '1.1', 'parent': '1', 'angle': '111', 'length': '112', 'offset': '113', 'twist': '114'},
-                4: {'name': '1.2', 'parent': '1', 'angle': '121', 'length': '122', 'offset': '123', 'twist': '124'},
-                5: {'name': '1.1.1', 'parent': '3', 'angle': '1111', 'length': '1112', 'offset': '1113', 'twist': '1114'},
-                6: {'name': '1.1.2', 'parent': '3', 'angle': '1121', 'length': '1122', 'offset': '1123', 'twist': '1124'}}
+Ziel: joints = {1: {'name': '1', 'parent': '0', 'angle': 'np.pi/2', 'length': '1.2', 'offset': '1.3', 'twist': 'np.pi'},
+                2: {'name': '2', 'parent': '0', 'angle': 'np.pi', 'length': '2.4', 'offset': '3', 'twist': '0'},
+                3: {'name': '1.1', 'parent': '1', 'angle': '0', 'length': '2.3', 'offset': '1', 'twist': 'np.pi'},
+                4: {'name': '1.2', 'parent': '1', 'angle': 'np.pi/4', 'length': '1.5', 'offset': '0.2', 'twist': '-np.pi/4'},
+                5: {'name': '1.1.1', 'parent': '3', 'angle': '0', 'length': '1', 'offset': '3', 'twist': 'np.pi/4'},
+                6: {'name': '1.1.2', 'parent': '3', 'angle': '-np.pi/2', 'length': '0.5', 'offset': '2', 'twist': '0'}}
 
 -----------------------------------------------------------------------------------------------------------------------
 a = joints[1].get('twist').get('naaame')
