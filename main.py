@@ -137,7 +137,7 @@ def init_entire_transformationmatrices():
 
 def points_coord_system(id):
     ursprung_punkt_show = np.array([[0], [0], [0], [1]])
-    
+
 
 
     return ursprung_punkt_show
