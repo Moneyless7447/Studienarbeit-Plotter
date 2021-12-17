@@ -1,0 +1,32 @@
+{
+  "robot":
+  [
+    {
+      "angle": "Winkel",
+      "length": "1",
+      "offset": "2",
+      "twist": "3",
+      "children":
+      [
+        {
+          "angle": "a",
+          "length": "b",
+          "offset": "d",
+          "twist": "d"
+        },
+        {
+          "angle": "a",
+          "length": "6",
+          "offset": "7",
+          "twist": "9"
+        }
+      ]
+    },
+    {
+      "angle": "Winkel 22",
+      "length": "1111",
+      "offset": "2222",
+      "twist": "3333"
+    }
+  ]
+}

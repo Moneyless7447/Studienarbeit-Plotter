@@ -1,0 +1,44 @@
+{
+  "robot": [
+    {
+      "angle": "11",
+      "length": "12",
+      "offset": "13",
+      "twist": "14",
+      "children": [
+        {
+          "angle": "111",
+          "length": "112",
+          "offset": "113",
+          "twist": "114",
+          "children": [
+            {
+              "angle": "1111",
+              "length": "1112",
+              "offset": "1113",
+              "twist": "1114"
+            },
+            {
+              "angle": "1121",
+              "length": "1122",
+              "offset": "1123",
+              "twist": "1124"
+            }
+          ]
+        },
+        {
+          "angle": "121",
+          "length": "122",
+          "offset": "123",
+          "twist": "124"
+        }
+      ]
+    },
+    {
+      "angle": "21",
+      "length": "22",
+      "offset": "23",
+      "twist": "24"
+    }
+  ]
+}

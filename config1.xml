@@ -1,23 +1,56 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<roboter>
+    <joint>
+        <!-- Joint "1.1" -->
+        <angle>"Winkel"</angle>
+        <length> "1" </length>
+        <offset> "2" </offset>
+        <twist> "3" </twist>
 
-<joint>
-    <angle>a</angle>
-    <length></length>
-    <offset></offset>
-    <twist></twist>
+        <children>
+            <joint>
+                <!-- Joint "2.1" -->
+                <angle>"a"</angle>
+                <length>b</length>
+                <offset>d</offset>
+                <twist>d</twist>
 
-    <children>
-        <joint>
-        <angle>a</angle>
-        <length></length>
-        <offset></offset>
-        <twist></twist>
-        </joint>,
-        <joint>
-        <angle>a</angle>
-        <length></length>
-        <offset></offset>
-        <twist></twist>
-        </joint>
-    </children>
-</joint>
+                    <children>
+                    <joint>
+                        <!-- Joint "3.1.1" -->
+                        <angle>a</angle>
+                        <length></length>
+                        <offset></offset>
+                        <twist></twist>
+                    </joint>
+
+                    <joint>
+                        <!-- Joint "3.1.2" -->
+                        <angle>a</angle>
+                        <length></length>
+                        <offset></offset>
+                        <twist></twist>
+                    </joint>
+                    </children>
+
+            </joint>,
+
+            <joint>
+            <!-- Joint "2.2" -->
+            <angle>a</angle>
+            <length></length>
+            <offset></offset>
+            <twist></twist>
+            </joint>
+        </children>
+    </joint>
+    <joint>
+        <!-- Joint "1.2" -->
+        <angle>"Winkel 22"</angle>
+        <length> "1111" </length>
+        <offset> "2222" </offset>
+        <twist> "3333" </twist>
+    </joint>
+
+
+</roboter>
