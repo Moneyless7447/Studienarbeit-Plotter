@@ -3,7 +3,6 @@ import numpy as np
 import math
 from robot import *
 import json
-from mpl_toolkits import mplot3d
 
 
 #Datei auslesen und als Dictionary abspeichern
@@ -41,19 +40,19 @@ def restructureDic(dic):
     #print(f"anz_joints: {anz_joints}")
 """
 Geg.: {'robot': [{'angle': 'Winkel', 'length': '1', 'offset': '2', 'twist': '3', 'children': [{'angle': 'a', 'length': 'b', 'offset': 'd', 'twist': 'd'}]}]}
-Ziel: joints = {1: {'name': '1', 'parent': '0', 'angle': 'Winkel', 'length': '1', 'offset': '2', 'twist': '3'},
-                2: {'name': '2', 'parent': '1', 'angle': 'a', 'length': 'b', 'offset': 'd', 'twist': 'd'}}
+Ziel: joints = {1: {'name': '1', 'parent': '0', 'angle': 'np.pi/4', 'length': '1', 'offset': '2', 'twist': '0'},
+                2: {'name': '2', 'parent': '1', 'angle': '0', 'length': '2', 'offset': '0', 'twist': '0'}}
 'parent': 'ID in joints, where 0 equals given base'
 
 -----------------------------------------------------------------------------------------------------------------------
 
 Geg.: 
 {'robot': [{'angle': 'np.pi/2', 'length': '1.2', 'offset': '1.3', 'twist': '0', 'children':          (1)
-[{'angle': '0', 'length': '2.3', 'offset': '1', 'twist': 'np.pi', 'children':                         (3)
-[{'angle': '0', 'length': '1', 'offset': '3', 'twist': 'np.pi/4'},                                  (5)
-{'angle': '-np.pi/2', 'length': '0.5', 'offset': '2', 'twist': '0'}]},                                  (6)
-{'angle': 'np.pi/4', 'length': '1.5', 'offset': '0.2', 'twist': '-np.pi/4'}]},                          (4)
-{'angle': 'np.pi', 'length': '2.4', 'offset': '3', 'twist': '0'}]}                               (2)
+[{'angle': '0', 'length': '2.3', 'offset': '1', 'twist': 'np.pi', 'children':                        (3)
+[{'angle': '0', 'length': '1', 'offset': '3', 'twist': 'np.pi/4'},                                   (5)
+{'angle': '-np.pi/2', 'length': '0.5', 'offset': '2', 'twist': '0'}]},                               (6)
+{'angle': 'np.pi/4', 'length': '1.5', 'offset': '0.2', 'twist': '-np.pi/4'}]},                       (4)
+{'angle': 'np.pi', 'length': '2.4', 'offset': '3', 'twist': '0'}]}                                   (2)
 
 Ziel: joints = {1: {'name': '1', 'parent': '0', 'angle': 'np.pi/2', 'length': '1.2', 'offset': '1.3', 'twist': 'np.pi'},
                 2: {'name': '2', 'parent': '0', 'angle': 'np.pi', 'length': '2.4', 'offset': '3', 'twist': '0'},
@@ -70,12 +69,16 @@ a = joints[1].get('twist').get('naaame')
 
 
 # Beispiel B Dictionary für einen Roboter
-joints = {1: {'name': '1', 'parent': '0', 'angle': '11', 'length': '12', 'offset': '13', 'twist': '14'},
-          2: {'name': '2', 'parent': '0', 'angle': '21', 'length': '22', 'offset': '23', 'twist': '24'},
-          3: {'name': '1.1', 'parent': '1', 'angle': '111', 'length': '112', 'offset': '113', 'twist': '114'},
-          4: {'name': '1.2', 'parent': '1', 'angle': '121', 'length': '122', 'offset': '123', 'twist': '124'},
-          5: {'name': '1.1.1', 'parent': '3', 'angle': '1111', 'length': '1112', 'offset': '1113', 'twist': '1114'},
-          6: {'name': '1.1.2', 'parent': '3', 'angle': '1121', 'length': '1122', 'offset': '1123', 'twist': '1124'}}
+joints = {1: {'name2': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': np.pi},
+          2: {'name2': '2', 'parent': 0, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
+          3: {'name2': '1.1', 'parent': 1, 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
+          4: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
+          5: {'name2': '1.1.1', 'parent': 3, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
+          6: {'name2': '1.1.2', 'parent': 3, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
+# joints = {1: {'name': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1, 'offset': 2, 'twist': 0},
+#           2: {'name': '2', 'parent': 1, 'angle': np.pi/2, 'length': 2, 'offset': -1, 'twist': np.pi/2}}
+
+
 
 
 # Liste der nötigen Transformationsmatrizen, um vom Ursprung zu jedem Gelenk transformieren zu können
@@ -91,9 +94,9 @@ def init_kin_chains():
     for n in range(len(kin_chain_list)):
         tmp_parent = n
 
-        while int(kin_chain_list[n][0]) != 0:
-            kin_chain_list[n] = [int((joints[tmp_parent].get('parent'))), *kin_chain_list[n]]
-            tmp_parent = int(joints[tmp_parent].get('parent'))
+        while float(kin_chain_list[n][0]) != 0:
+            kin_chain_list[n] = [float((joints[tmp_parent].get('parent'))), *kin_chain_list[n]]
+            tmp_parent = float(joints[tmp_parent].get('parent'))
 
     print("kin_chain_list: ", kin_chain_list)
 
@@ -103,17 +106,17 @@ def init_kin_chains():
 def init_transformationmatrix_dh(id):
     #T_id = DH Transformationsmatrix T_id-1_id
     T_id = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]
-    T_id[0][0] = math.cos(int(joints[id].get('angle')))
-    T_id[0][1] = -math.sin(int(joints[id].get('angle')))*math.cos(int(joints[id].get('twist')))
-    T_id[0][2] = math.sin(int(joints[id].get('angle')))*math.sin(int(joints[id].get('twist')))
-    T_id[0][3] = int(joints[id].get('length'))*math.cos(int(joints[id].get('angle')))
-    T_id[1][0] = math.sin(int(joints[id].get('angle')))
-    T_id[1][1] = math.cos(int(joints[id].get('angle'))) * math.cos(int(joints[id].get('twist')))
-    T_id[1][2] = -math.cos(int(joints[id].get('angle'))) * math.sin(int(joints[id].get('twist')))
-    T_id[1][3] = int(joints[id].get('length')) * math.sin(int(joints[id].get('angle')))
-    T_id[2][1] = math.sin(int(joints[id].get('twist')))
-    T_id[2][2] = math.cos(int(joints[id].get('twist')))
-    T_id[2][3] = int(joints[id].get('offset'))
+    T_id[0][0] = math.cos(float(joints[id].get('angle')))
+    T_id[0][1] = -math.sin(float(joints[id].get('angle')))*math.cos(float(joints[id].get('twist')))
+    T_id[0][2] = math.sin(float(joints[id].get('angle')))*math.sin(float(joints[id].get('twist')))
+    T_id[0][3] = float(joints[id].get('length'))*math.cos(float(joints[id].get('angle')))
+    T_id[1][0] = math.sin(float(joints[id].get('angle')))
+    T_id[1][1] = math.cos(float(joints[id].get('angle'))) * math.cos(float(joints[id].get('twist')))
+    T_id[1][2] = -math.cos(float(joints[id].get('angle'))) * math.sin(float(joints[id].get('twist')))
+    T_id[1][3] = float(joints[id].get('length')) * math.sin(float(joints[id].get('angle')))
+    T_id[2][1] = math.sin(float(joints[id].get('twist')))
+    T_id[2][2] = math.cos(float(joints[id].get('twist')))
+    T_id[2][3] = float(joints[id].get('offset'))
 
     return T_id
 
@@ -135,12 +138,29 @@ def init_entire_transformationmatrices():
     return entire_T_list
 
 
-def points_coord_system(id):
+def points_coord_system(id, entire_T):
+
     ursprung_punkt_show = np.array([[0], [0], [0], [1]])
+    x_axis_show = np.array([[0.3], [0], [0], [1]])
+    y_axis_show = np.array([[0], [0.3], [0], [1]])
+    z_axis_show = np.array([[0], [0], [0.3], [1]])
+
+    #Transformationsmatrix * Punkt = Punkt
+    ursprung_punkt_show = np.dot(entire_T[id], ursprung_punkt_show)
+    x_axis_show = np.dot(entire_T[id], x_axis_show)
+    y_axis_show = np.dot(entire_T[id], y_axis_show)
+    z_axis_show = np.dot(entire_T[id], z_axis_show)
+
+    #print(f'ursprung_punkt_show_hom {ursprung_punkt_show}')
+    ursprung_punkt_show = ursprung_punkt_show[:3, :1]
+    x_axis_show = x_axis_show[:3, :1]
+    y_axis_show = y_axis_show[:3, :1]
+    z_axis_show = z_axis_show[:3, :1]
+    #print(f'ursprung_punkt_show {ursprung_punkt_show}')
 
 
 
-    return ursprung_punkt_show
+    return [ursprung_punkt_show, x_axis_show, y_axis_show, z_axis_show]
 
 
 
@@ -171,15 +191,10 @@ if __name__ == '__main__':
 
     entire_T = init_entire_transformationmatrices()
     print(f'entire_T = {entire_T}')
-    A = entire_T[0]
-    print(f'A: {A}')
 
+    # A = entire_T[0]
+    # print(f'A: {A}')
     #ursprung_punkt_show = np.array([[0], [0], [0], [1]])
-
-
-
-
-
     # punkt_P = np.array([[0], [0], [0]])
     # print(f'punkt_P: {punkt_P}')
     # punkt_P_hom = np.append(punkt_P, [1])
@@ -187,26 +202,65 @@ if __name__ == '__main__':
     # punkt_P_calc = [punkt_P_hom[0], punkt_P_hom[1], punkt_P_hom[2]]
     # print(f'punkt_P_calc: {punkt_P_calc}')
     #print([punkt_P[0, 0], punkt_P[1, 0], punkt_P[1, 0]])
-
-
     # A_show = A[:3, :3]
     # print(f'A_show:\n {A_show}')
-
-
-    punkt_P_hom = np.array([[0], [0], [0], [1]])
-    print(f'punkt_P:\n {punkt_P_hom}')
-    #punkt_P_show = punkt_P_hom[:3, :1]
-    #print(f'punkt_P_show:\n {punkt_P_show}')
-
-
-
+    # punkt_P_hom = np.array([[0], [0], [0], [1]])
+    # print(f'punkt_P:\n {punkt_P_hom}')
+    # punkt_P_show = punkt_P_hom[:3, :1]
+    # print(f'punkt_P_show:\n {punkt_P_show}')
 
     fig = plt.figure()
-    #plt.rcParams['figure.figsize']=(8,6)
-    ax=plt.axes(projection='3d')
-    #ax.scatter3D(1,2,3)
-    #plt.plot([1, 2, 3], [1, 2, 3], 'go-', label='line 1', linewidth=2)
-    #plt.plot([punkt_P[0, 0], punkt_P[1, 0], punkt_P[1, 0]], [1, 2, 3], 'go-', label='line 1', linewidth=2)
-    #plt.plot(punkt_P_show, [1, 2, 3], 'go-', label='line 1', linewidth=2)
+    plt.rcParams['figure.figsize']=(10,20)
+    ax = plt.axes(projection='3d')
+    # Ursprung Koord 0 ######################################################
+    test_ursprung_0 = points_coord_system(0, entire_T)[0]   # ursprung_punkt_show
+    test_ursprung_x_0 = points_coord_system(0, entire_T)[1] # x_axis_show (Punkt für x-Achse)
+    test_ursprung_y_0 = points_coord_system(0, entire_T)[2] # y_axis_show
+    test_ursprung_z_0 = points_coord_system(0, entire_T)[3] # z_axis_show
+
+    plt.plot([test_ursprung_0[0, 0]], [test_ursprung_0[1, 0]], [test_ursprung_0[2, 0]], 'wo', label='Ursprung 0',
+             linewidth=1)
+    plt.plot([test_ursprung_0[0, 0], test_ursprung_x_0[0, 0]*5], [test_ursprung_0[1, 0], test_ursprung_x_0[1, 0]],
+             [test_ursprung_0[2, 0], test_ursprung_x_0[2, 0]], 'r-', label='x0',
+             linewidth=2)
+    plt.plot([test_ursprung_0[0, 0], test_ursprung_y_0[0, 0]], [test_ursprung_0[1, 0], test_ursprung_y_0[1, 0]*5],
+             [test_ursprung_0[2, 0], test_ursprung_y_0[2, 0]], 'g-', label='y0',
+             linewidth=2)
+    plt.plot([test_ursprung_0[0, 0], test_ursprung_z_0[0, 0]], [test_ursprung_0[1, 0], test_ursprung_z_0[1, 0]],
+             [test_ursprung_0[2, 0], test_ursprung_z_0[2, 0]*5], 'b-', label='y0',
+             linewidth=2)
+    #########################################################################
+    # Gelenkurspruenge mit Koordinatenachsen plotten#########################
+    for i in range(1, len(entire_T)):
+        # Ursprung
+        plt.plot([points_coord_system(i, entire_T)[0][0, 0]], [points_coord_system(i, entire_T)[0][1, 0]],
+                 [points_coord_system(i, entire_T)[0][2, 0]], 'kx')
+        # # x-Achse
+        plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[1][0, 0]],
+                 [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[2][1, 0]],
+                 [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[3][2, 0]],
+                 'r-', label='x', linewidth=3)
+        # y-Achse
+        # plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[1][0, 0]],
+        #          [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[2][1, 0]],
+        #          [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[3][2, 0]],
+        #          'g-', label='y', linewidth=3)
+        # z-Achse
+        # plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[1][0, 0]],
+        #          [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[2][1, 0]],
+        #          [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[3][2, 0]],
+        #          'b-', label='z', linewidth=3)
+    ########################################################################
+
+
+
+
+
+    #alternativ
+    #ax.scatter3D(test_ursprung_0[0, 0], test_ursprung_0[1, 0], test_ursprung_0[2, 0])
+
+    #plt.plot([1, 1, 1], [1, 1, 1], 'go-', label='line 1', linewidth=2)
+    #plt.plot([1], [1], [1], 'go-', label='line 1', linewidth=2)
+
     plt.show()
 

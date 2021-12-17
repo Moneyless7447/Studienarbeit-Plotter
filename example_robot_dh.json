@@ -1,6 +1,8 @@
 {
   "robot": [
     {
+      "name": "",
+      "type": "",
       "angle": "np.pi/2",
       "length": "1.2",
       "offset": "1.3",
