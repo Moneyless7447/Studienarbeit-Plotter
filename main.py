@@ -264,24 +264,22 @@ if __name__ == '__main__':
                  [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[3][1, 0]],
                  [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[3][2, 0]],
                  'b-', label='z', linewidth=1)
+
     ########################################################################
-    #verbindungslinien der Koordinatensysteme###############################
-    #print(f"kin_chain_list{kin_chain_list}")
+    # verbindungslinien der Koordinatensysteme##############################
+    # kin chain Liste zu den jeweiligen Parents
     kin_chain_list_parent = [[0]]
     for k in range(1, len(kin_chain_list)):
         kin_chain_list_parent.append(kin_chain_list[k][0:-1])
-    #print(f"kin_chain_list_parent{kin_chain_list_parent}")
-    #print(np.dot(init_chain_transformationmatrix(1,kin_chain_list_parent), [[0], [0], [0], [1]])[0])
 
-    #
+    # plot einer Verbindungslinie zwischen dem Ursprung eines Gelenks und dem Ursprung des Parentgelenks
+    # berechnung der Transformationsmatrix des Parents für Koordinaten
     for i in range(1, len(entire_T)):
         #Ursprung parent, Ursprung selbst -> verbindungslinie
         plt.plot([np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[0],points_coord_system(i, entire_T)[0][0, 0]],
                  [np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[1],points_coord_system(i, entire_T)[0][1, 0]],
                  [np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[2],points_coord_system(i, entire_T)[0][2, 0]],
                  'k:', linewidth=0.5)
-
-
 
     ########################################################################
 
