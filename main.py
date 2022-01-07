@@ -123,9 +123,9 @@ def init_transformationmatrix_dh(id):
     return T_id
 
 # Gibt eine Gesamtransformationsmatrix_0_Gelenk für EIN Gelenk aus der kin_chain_list zurueck
-def init_chain_transformationmatrix(id):
+def init_chain_transformationmatrix(id, list_kin_chain):
     #Segment aus kin_chain_list abhaengig von ID
-    piece_kin_chain_list=kin_chain_list[id]
+    piece_kin_chain_list=list_kin_chain[id]
     g_T_id = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     for i in range(1, len(piece_kin_chain_list)):
             g_T_id = np.dot(g_T_id, init_transformationmatrix_dh(piece_kin_chain_list[i]))
@@ -135,7 +135,7 @@ def init_chain_transformationmatrix(id):
 # Gibt eine Liste aus Gesamtransformationsmatrizen für alle Gelenke zurueck
 def init_entire_transformationmatrices():
     #Ziel: [[MatrixG0], [MatrixG1], [MatrixG2], ...]
-    entire_T_list = [init_chain_transformationmatrix(i) for i in range(len(kin_chain_list))]
+    entire_T_list = [init_chain_transformationmatrix(i, kin_chain_list) for i in range(len(kin_chain_list))]
 
     return entire_T_list
 
@@ -143,9 +143,9 @@ def init_entire_transformationmatrices():
 def points_coord_system(id, entire_T):
 
     ursprung_punkt_show = np.array([[0], [0], [0], [1]])
-    x_axis_show = np.array([[0.5], [0], [0], [1]])
-    y_axis_show = np.array([[0], [0.5], [0], [1]])
-    z_axis_show = np.array([[0], [0], [0.5], [1]])
+    x_axis_show = np.array([[0.7], [0], [0], [1]])
+    y_axis_show = np.array([[0], [0.7], [0], [1]])
+    z_axis_show = np.array([[0], [0], [0.7], [1]])
 
     #Transformationsmatrix * Punkt = Punkt
     ursprung_punkt_show = np.dot(entire_T[id], ursprung_punkt_show)
@@ -222,7 +222,7 @@ if __name__ == '__main__':
     test_ursprung_y_0 = points_coord_system(0, entire_T)[2] # y_axis_show
     test_ursprung_z_0 = points_coord_system(0, entire_T)[3] # z_axis_show
 
-    # Plot des Ursprungs und Achsen
+    # Plot des Ursprungs und Achsen vom Basiskoordinatensystems
     plt.plot([test_ursprung_0[0, 0]], [test_ursprung_0[1, 0]], [test_ursprung_0[2, 0]], 'wo', label='Ursprung 0',
              linewidth=1)
     plt.plot([test_ursprung_0[0, 0], test_ursprung_x_0[0, 0]*5], [test_ursprung_0[1, 0], test_ursprung_x_0[1, 0]],
@@ -239,7 +239,7 @@ if __name__ == '__main__':
     for i in range(1, len(entire_T)):
         # Ursprung
         plt.plot([points_coord_system(i, entire_T)[0][0, 0]], [points_coord_system(i, entire_T)[0][1, 0]],
-                 [points_coord_system(i, entire_T)[0][2, 0]], 'kx')
+                 [points_coord_system(i, entire_T)[0][2, 0]], 'k,')
         # # x-Achse
                                 # ursprung_punkt_show[x,0], x_axis_show[x,0]
                                 # ursprung_punkt_show[y,0], x_axis_show[y,0]
@@ -247,7 +247,7 @@ if __name__ == '__main__':
         plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[1][0, 0]],
                  [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[1][1, 0]],
                  [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[1][2, 0]],
-                 'r-', label='x', linewidth=2)
+                 'r-', label='x', linewidth=0.5)
         #y-Achse
                                 # ursprung_punkt_show[x,0], y_axis_show[x,0]
                                 # ursprung_punkt_show[y,0], y_axis_show[y,0]
@@ -255,7 +255,7 @@ if __name__ == '__main__':
         plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[2][0, 0]],
                  [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[2][1, 0]],
                  [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[2][2, 0]],
-                 'g-', label='y', linewidth=2)
+                 'g-', label='y', linewidth=0.5)
         #z-Achse
                                 # ursprung_punkt_show[x,0], z_axis_show[x,0]
                                 # ursprung_punkt_show[y,0], z_axis_show[y,0]
@@ -263,9 +263,27 @@ if __name__ == '__main__':
         plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[3][0, 0]],
                  [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[3][1, 0]],
                  [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[3][2, 0]],
-                 'b-', label='z', linewidth=2)
+                 'b-', label='z', linewidth=1)
     ########################################################################
+    #verbindungslinien der Koordinatensysteme###############################
+    #print(f"kin_chain_list{kin_chain_list}")
+    kin_chain_list_parent = [[0]]
+    for k in range(1, len(kin_chain_list)):
+        kin_chain_list_parent.append(kin_chain_list[k][0:-1])
+    #print(f"kin_chain_list_parent{kin_chain_list_parent}")
+    #print(np.dot(init_chain_transformationmatrix(1,kin_chain_list_parent), [[0], [0], [0], [1]])[0])
 
+    #
+    for i in range(1, len(entire_T)):
+        #Ursprung parent, Ursprung selbst -> verbindungslinie
+        plt.plot([np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[0],points_coord_system(i, entire_T)[0][0, 0]],
+                 [np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[1],points_coord_system(i, entire_T)[0][1, 0]],
+                 [np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[2],points_coord_system(i, entire_T)[0][2, 0]],
+                 'k:', linewidth=0.5)
+
+
+
+    ########################################################################
 
 
 
