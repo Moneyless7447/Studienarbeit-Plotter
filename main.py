@@ -3,6 +3,8 @@ import numpy as np
 import math
 from robot import *
 import json
+from mpl_toolkits.mplot3d import Axes3D
+
 
 
 #Datei auslesen und als Dictionary abspeichern
@@ -54,12 +56,12 @@ Geg.:
 {'angle': 'np.pi/4', 'length': '1.5', 'offset': '0.2', 'twist': '-np.pi/4'}]},                       (4)
 {'angle': 'np.pi', 'length': '2.4', 'offset': '3', 'twist': '0'}]}                                   (2)
 
-Ziel: joints = {1: {'name': '1', 'parent': '0', 'angle': 'np.pi/2', 'length': '1.2', 'offset': '1.3', 'twist': 'np.pi'},
-                2: {'name': '2', 'parent': '0', 'angle': 'np.pi', 'length': '2.4', 'offset': '3', 'twist': '0'},
-                3: {'name': '1.1', 'parent': '1', 'angle': '0', 'length': '2.3', 'offset': '1', 'twist': 'np.pi'},
-                4: {'name': '1.2', 'parent': '1', 'angle': 'np.pi/4', 'length': '1.5', 'offset': '0.2', 'twist': '-np.pi/4'},
-                5: {'name': '1.1.1', 'parent': '3', 'angle': '0', 'length': '1', 'offset': '3', 'twist': 'np.pi/4'},
-                6: {'name': '1.1.2', 'parent': '3', 'angle': '-np.pi/2', 'length': '0.5', 'offset': '2', 'twist': '0'}}
+Ziel: joints = {1: {'name2': '1', 'parent': '0', 'angle': 'np.pi/2', 'length': '1.2', 'offset': '1.3', 'twist': 'np.pi'},
+                2: {'name2': '2', 'parent': '0', 'angle': 'np.pi', 'length': '2.4', 'offset': '3', 'twist': '0'},
+                3: {'name2': '1.1', 'parent': '1', 'angle': '0', 'length': '2.3', 'offset': '1', 'twist': 'np.pi'},
+                4: {'name2': '1.2', 'parent': '1', 'angle': 'np.pi/4', 'length': '1.5', 'offset': '0.2', 'twist': '-np.pi/4'},
+                5: {'name2': '1.1.1', 'parent': '3', 'angle': '0', 'length': '1', 'offset': '3', 'twist': 'np.pi/4'},
+                6: {'name2': '1.1.2', 'parent': '3', 'angle': '-np.pi/2', 'length': '0.5', 'offset': '2', 'twist': '0'}}
 
 -----------------------------------------------------------------------------------------------------------------------
 a = joints[1].get('twist').get('naaame')
@@ -69,14 +71,14 @@ a = joints[1].get('twist').get('naaame')
 
 
 # Beispiel B Dictionary für einen Roboter
-joints = {1: {'name2': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': np.pi},
-          2: {'name2': '2', 'parent': 0, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
-          3: {'name2': '1.1', 'parent': 1, 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
-          4: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
-          5: {'name2': '1.1.1', 'parent': 3, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
-          6: {'name2': '1.1.2', 'parent': 3, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
-# joints = {1: {'name': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1, 'offset': 2, 'twist': 0},
-#           2: {'name': '2', 'parent': 1, 'angle': np.pi/2, 'length': 2, 'offset': -1, 'twist': np.pi/2}}
+# joints = {1: {'name2': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': np.pi},
+#           2: {'name2': '2', 'parent': 0, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
+#           3: {'name2': '1.1', 'parent': 1, 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
+#           4: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
+#           5: {'name2': '1.1.1', 'parent': 3, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
+#           6: {'name2': '1.1.2', 'parent': 3, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
+joints = {1: {'name': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1, 'offset': 2, 'twist': 0},
+          2: {'name': '2', 'parent': 1, 'angle': np.pi/2, 'length': 2, 'offset': -1, 'twist': np.pi/2}}
 
 
 
@@ -261,6 +263,15 @@ if __name__ == '__main__':
 
     #plt.plot([1, 1, 1], [1, 1, 1], 'go-', label='line 1', linewidth=2)
     #plt.plot([1], [1], [1], 'go-', label='line 1', linewidth=2)
+
+
+    # plt.gca().set_aspect('equal', adjustable='box')
+
+
+    #TODO Variable min und max
+    ax.set_xlim3d([-5, 5])
+    ax.set_ylim3d([-5, 5])
+    ax.set_zlim3d([-5, 5])
 
     plt.show()
 

@@ -1,8 +1,8 @@
 {
   "robot": [
     {
-      "name": "",
-      "type": "",
+      "name": "Alpha-Gelenk",
+      "type": "rotation",
       "angle": "np.pi/2",
       "length": "1.2",
       "offset": "1.3",
