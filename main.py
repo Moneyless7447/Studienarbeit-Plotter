@@ -71,14 +71,14 @@ a = joints[1].get('twist').get('naaame')
 
 
 # Beispiel B Dictionary für einen Roboter
-# joints = {1: {'name2': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': 0},
-#           2: {'name2': '2', 'parent': 0, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
-#           3: {'name2': '1.1', 'parent': 1, 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
-#           4: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
-#           5: {'name2': '1.1.1', 'parent': 3, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
-#           6: {'name2': '1.1.2', 'parent': 3, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
-joints = {1: {'name': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1, 'offset': 2, 'twist': 0},
-          2: {'name': '2', 'parent': 1, 'angle': np.pi/2, 'length': 2, 'offset': -1, 'twist': np.pi/2}}
+joints = {1: {'name2': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': 0},
+          2: {'name2': '2', 'parent': 0, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
+          3: {'name2': '1.1', 'parent': 1, 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
+          4: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
+          5: {'name2': '1.1.1', 'parent': 3, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
+          6: {'name2': '1.1.2', 'parent': 3, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
+# joints = {1: {'name': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1, 'offset': 2, 'twist': 0},
+#           2: {'name': '2', 'parent': 1, 'angle': np.pi/2, 'length': 2, 'offset': -1, 'twist': np.pi/2}}
 
 
 
@@ -143,9 +143,9 @@ def init_entire_transformationmatrices():
 def points_coord_system(id, entire_T):
 
     ursprung_punkt_show = np.array([[0], [0], [0], [1]])
-    x_axis_show = np.array([[0.3], [0], [0], [1]])
-    y_axis_show = np.array([[0], [0.3], [0], [1]])
-    z_axis_show = np.array([[0], [0], [0.3], [1]])
+    x_axis_show = np.array([[0.5], [0], [0], [1]])
+    y_axis_show = np.array([[0], [0.5], [0], [1]])
+    z_axis_show = np.array([[0], [0], [0.5], [1]])
 
     #Transformationsmatrix * Punkt = Punkt
     ursprung_punkt_show = np.dot(entire_T[id], ursprung_punkt_show)
@@ -214,12 +214,15 @@ if __name__ == '__main__':
     fig = plt.figure()
     plt.rcParams['figure.figsize']=(10,20)
     ax = plt.axes(projection='3d')
+
     # Ursprung Koord 0 ######################################################
+
     test_ursprung_0 = points_coord_system(0, entire_T)[0]   # ursprung_punkt_show
     test_ursprung_x_0 = points_coord_system(0, entire_T)[1] # x_axis_show (Punkt für x-Achse)
     test_ursprung_y_0 = points_coord_system(0, entire_T)[2] # y_axis_show
     test_ursprung_z_0 = points_coord_system(0, entire_T)[3] # z_axis_show
 
+    # Plot des Ursprungs und Achsen
     plt.plot([test_ursprung_0[0, 0]], [test_ursprung_0[1, 0]], [test_ursprung_0[2, 0]], 'wo', label='Ursprung 0',
              linewidth=1)
     plt.plot([test_ursprung_0[0, 0], test_ursprung_x_0[0, 0]*5], [test_ursprung_0[1, 0], test_ursprung_x_0[1, 0]],
@@ -238,20 +241,29 @@ if __name__ == '__main__':
         plt.plot([points_coord_system(i, entire_T)[0][0, 0]], [points_coord_system(i, entire_T)[0][1, 0]],
                  [points_coord_system(i, entire_T)[0][2, 0]], 'kx')
         # # x-Achse
+                                # ursprung_punkt_show[x,0], x_axis_show[x,0]
+                                # ursprung_punkt_show[y,0], x_axis_show[y,0]
+                                # ursprung_punkt_show[z,0], x_axis_show[z,0]
         plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[1][0, 0]],
+                 [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[1][1, 0]],
+                 [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[1][2, 0]],
+                 'r-', label='x', linewidth=2)
+        #y-Achse
+                                # ursprung_punkt_show[x,0], y_axis_show[x,0]
+                                # ursprung_punkt_show[y,0], y_axis_show[y,0]
+                                # ursprung_punkt_show[z,0], y_axis_show[z,0]
+        plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[2][0, 0]],
                  [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[2][1, 0]],
+                 [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[2][2, 0]],
+                 'g-', label='y', linewidth=2)
+        #z-Achse
+                                # ursprung_punkt_show[x,0], z_axis_show[x,0]
+                                # ursprung_punkt_show[y,0], z_axis_show[y,0]
+                                # ursprung_punkt_show[z,0], z_axis_show[z,0]
+        plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[3][0, 0]],
+                 [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[3][1, 0]],
                  [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[3][2, 0]],
-                 'r-', label='x', linewidth=3)
-        # y-Achse
-        # plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[1][0, 0]],
-        #          [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[2][1, 0]],
-        #          [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[3][2, 0]],
-        #          'g-', label='y', linewidth=3)
-        # z-Achse
-        # plt.plot([points_coord_system(i, entire_T)[0][0, 0], points_coord_system(i, entire_T)[1][0, 0]],
-        #          [points_coord_system(i, entire_T)[0][1, 0], points_coord_system(i, entire_T)[2][1, 0]],
-        #          [points_coord_system(i, entire_T)[0][2, 0], points_coord_system(i, entire_T)[3][2, 0]],
-        #          'b-', label='z', linewidth=3)
+                 'b-', label='z', linewidth=2)
     ########################################################################
 
 
