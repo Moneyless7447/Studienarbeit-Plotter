@@ -7,47 +7,13 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 
-#Datei auslesen und als Dictionary abspeichern
-def jsontoDic(file_name):
-    #Datei oeffnen
-    robot_json = open(file_name)
-
-    # JSON Object als Dictionary
-    robot_data = json.load(robot_json)
-
-    #print(robot_data)
-
-    #for i in data['robot']:
-     #   print(i)
-
-    robot_json.close()
-    return robot_data
-
-#Sucht nach "key" in gegebener Liste, return: Anzahl der gefundenen Keys
-def searchForKeyinDic(dic, key_search):
-    #TODO: Code
-    anz_key = 0
-
-    return anz_key
-
-# Umstrukturierung des Dictionaries für Weiterverwendung (nicht fertig!!!)
-def restructureDic(dic):
-    # TODO: Code
-    rob_dic = {}
-    anz_joints = 0
-    #for 'robot' in dic:
-
-        #anz_joints += 1
-
-    #print(f"anz_joints: {anz_joints}")
+################################################################
+# Json Baumstruktur zu Dictonary umstrukturieren
 """
 Geg.: {'robot': [{'angle': 'Winkel', 'length': '1', 'offset': '2', 'twist': '3', 'children': [{'angle': 'a', 'length': 'b', 'offset': 'd', 'twist': 'd'}]}]}
 Ziel: joints = {1: {'name': '1', 'parent': '0', 'angle': 'np.pi/4', 'length': '1', 'offset': '2', 'twist': '0'},
                 2: {'name': '2', 'parent': '1', 'angle': '0', 'length': '2', 'offset': '0', 'twist': '0'}}
-'parent': 'ID in joints, where 0 equals given base'
-
 -----------------------------------------------------------------------------------------------------------------------
-
 Geg.: 
 {'robot': [{'angle': 'np.pi/2', 'length': '1.2', 'offset': '1.3', 'twist': '0', 'children':          (1)
 [{'angle': '0', 'length': '2.3', 'offset': '1', 'twist': 'np.pi', 'children':                        (3)
@@ -64,23 +30,39 @@ Ziel: joints = {1: {'name2': '1', 'parent': '0', 'angle': 'np.pi/2', 'length': '
                 6: {'name2': '1.1.2', 'parent': '3', 'angle': '-np.pi/2', 'length': '0.5', 'offset': '2', 'twist': '0'}}
 
 -----------------------------------------------------------------------------------------------------------------------
-a = joints[1].get('twist').get('naaame')
-
-
 """
+def restructure_tree():
+    with open("./data.json") as data:
+        test_data = json.load(data)
 
 
-# Beispiel B Dictionary für einen Roboter
+    def build_tree(data_list: list):
+        def _build_tree(data: dict, result: dict = dict(), key: str = "1"):
+            if 'children' not in data:
+                result[key] = data
+                return
+            else:
+                result[key] = {"angle": data["angle"], "length": data["length"], "offset": data["offset"],
+                               "twist": data["twist"], "name": data["name"], "type": data["type"]}
+                for index, value in enumerate(data['children']):
+                    new_key = f"{key}.{index + 1}"
+                    _build_tree(data=value, result=result, key=new_key)
+                return
+
+        result = dict()
+        for index, value in enumerate(data_list):
+            _build_tree(data=value, result=result, key=f"{index + 1}")
+        return result
+
+
+robot = test_data['robot']
+
 joints = {1: {'name2': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': 0},
-          2: {'name2': '2', 'parent': 0, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
-          3: {'name2': '1.1', 'parent': 1, 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
+          2: {'name2': '1.1', 'parent': 1, 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
+          3: {'name2': '2', 'parent': 0, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
           4: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
-          5: {'name2': '1.1.1', 'parent': 3, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
-          6: {'name2': '1.1.2', 'parent': 3, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
-# joints = {1: {'name': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1, 'offset': 2, 'twist': 0},
-#           2: {'name': '2', 'parent': 1, 'angle': np.pi/2, 'length': 2, 'offset': -1, 'twist': np.pi/2}}
-
-
+          5: {'name2': '1.1.1', 'parent': 2, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
+          6: {'name2': '1.1.2', 'parent': 2, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
 
 
 # Liste der nötigen Transformationsmatrizen, um vom Ursprung zu jedem Gelenk transformieren zu können
@@ -214,6 +196,7 @@ if __name__ == '__main__':
     fig = plt.figure()
     plt.rcParams['figure.figsize']=(10,20)
     ax = plt.axes(projection='3d')
+    #ax = fig.add_subplot(111, projection='3d')
 
     # Ursprung Koord 0 ######################################################
 
@@ -282,7 +265,54 @@ if __name__ == '__main__':
                  'k:', linewidth=0.5)
 
     ########################################################################
+    # Geometrische Formen im Plotter um die Koordinatensysteme -> je nach Art des Gelenks
+    #TODO Unterscheidung der Gelenktypen
 
+    # Rotationsgelenk um Z-Achse (DH-Konvention)
+    # Make data
+    # u = np.linspace(0, 2 * np.pi, 40)
+    # v = np.linspace(0, 2*  np.pi, 40)
+
+    # x = np.outer(np.cos(u), np.sin(v))
+    # y = np.outer(np.sin(u), np.sin(v))
+    # z = np.outer(np.ones(np.size(u)), np.cos(v))
+    scale_cylinder = 0.3
+    #              (start,stop,step)
+    u = np.linspace(0, 2 * np.pi, num=20) #num=step für Kreis
+    v = np.linspace(0, 3, num=2) #num=step für Hoehe Cylinder (min 2)
+    u2 = np.linspace(0, 2*np.pi, 40)
+    v2 = np.linspace(0, 2*np.pi, 40)
+
+    #                     , np.sin(Durchmesser)
+    # x = np.outer(np.cos(u), np.sin(scale_cylinder))
+    # #                     , np.sin(Durchmesser)
+    # y = np.outer(np.sin(u), np.sin(scale_cylinder))
+    # z = np.outer(np.ones(np.size(u)), np.cos(v))
+
+    x1 = np.outer(np.cos(u), np.sin(v))
+    y2 = np.outer(np.sin(u), np.sin(v))
+    z2 = np.outer(np.ones(np.size(u)), np.cos(v))
+
+
+    # x1 = np.outer(np.cos(u), np.sin(scale_cylinder))
+    # y1 = np.outer(np.sin(u), np.sin(scale_cylinder))
+    # z1 = np.outer(np.ones(np.size(u)), np.cos(v2))
+
+
+    # Plot the surface
+    # ax.plot_surface(x, y, z, color='k')
+    #ax.plot_surface(x1,y1,z1, color='b')
+    ###
+
+
+
+
+
+
+
+
+
+    ########################################################################
 
 
 
