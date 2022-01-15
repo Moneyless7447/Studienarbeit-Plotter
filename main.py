@@ -31,8 +31,11 @@ Ziel: joints = {1: {'name2': '1', 'parent': '0', 'angle': 'np.pi/2', 'length': '
 
 -----------------------------------------------------------------------------------------------------------------------
 """
-def restructure_tree():
-    with open("./data.json") as data:
+
+#"angle": "1.57078",
+
+def restructure_dic():
+    with open("./example_robot_dh.json") as data:
         test_data = json.load(data)
 
 
@@ -55,14 +58,31 @@ def restructure_tree():
         return result
 
 
-robot = test_data['robot']
+    robot = test_data['robot']
+    joints = build_tree(robot)
+    print(joints)
+    return joints
 
-joints = {1: {'name2': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': 0},
-          2: {'name2': '1.1', 'parent': 1, 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
-          3: {'name2': '2', 'parent': 0, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
-          4: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
-          5: {'name2': '1.1.1', 'parent': 2, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
-          6: {'name2': '1.1.2', 'parent': 2, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
+joints=restructure_dic()
+# print(joints["1.1"].get("length"))
+
+# joints = {1: {'name2': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': 0},
+#           2: {'name2': '1.1', 'parent': 1, 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
+#           3: {'name2': '2', 'parent': 0, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
+#           4: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
+#           5: {'name2': '1.1.1', 'parent': 2, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
+#           6: {'name2': '1.1.2', 'parent': 2, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
+
+
+# joints = {1: {'name': 'Alpha1-Gelenk', 'type': "rotation", 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': 0},
+#           1.1: {'name': 'Beta1-Gelenk',"type": "rotation", 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
+#           2: {, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
+#           1.2: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
+#           1.1.1: {'name2': '1.1.1', 'parent': 2, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
+#           1.1.2: {'name2': '1.1.2', 'parent': 2, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
+
+
+
 
 
 # Liste der nötigen Transformationsmatrizen, um vom Ursprung zu jedem Gelenk transformieren zu können
@@ -72,19 +92,29 @@ def init_kin_chains():
     bis zum Basiskoordinatensystem.
     Ziel, zu Beispiel B, Index in aeusserer Liste entspricht ID in Dictionary (1-6):
     kin_chain_list = [[0], [0,1], [0,2], [0,1,3], [0,1,4], [0,1,3,5], [0,1,3,6]]
-
+    kin_chain_list = [['0'], ['0','1'], ['0','2'], ['0','1','1.1'], ['0','1','1.2'], ['0','1','1.1','1.1.1'], ['0','1','1.1','1.1.2']]
     """
-    kin_chain_list = [[i] for i in range(len(joints)+1)]
-    for n in range(len(kin_chain_list)):
-        tmp_parent = n
 
-        while float(kin_chain_list[n][0]) != 0:
-            kin_chain_list[n] = [float((joints[tmp_parent].get('parent'))), *kin_chain_list[n]]
-            tmp_parent = float(joints[tmp_parent].get('parent'))
+    # kin_chain_list = [[i] for i in range(len(joints)+1)]
+    kin_chain_list = [[element] for element in joints]
+    kin_chain_list.insert(0, ['0'])
 
-    print("kin_chain_list: ", kin_chain_list)
+    for n in range(1,len(kin_chain_list)):
+        for zeichen in range(len(kin_chain_list[n][-1])-1,-1,-1):
+            if kin_chain_list[n][-1][zeichen] == '.':
+                kin_chain_list[n].insert(0,kin_chain_list[n][-1][0:zeichen])
+
+    for i in range(1, len(kin_chain_list)):
+        kin_chain_list[i].insert(0,'0')
+
+    #[['0'], ['1'], ['1.1'], ['1.1.1'], ['1.1.2'], ['1.2'], ['2']]
+    #[['0'], ['1'], ['1','1.1'], ['1.1.1'], ['1.1.2'], ['1.2'], ['2']]
+
+    #print("kin_chain_list: ", kin_chain_list)
 
     return kin_chain_list
+
+
 
 # Gibt eine Transformationsmatrix nach DH Konvention für T_id-1_id aus Daten von Dictionary joints zurueck
 def init_transformationmatrix_dh(id):
@@ -105,9 +135,9 @@ def init_transformationmatrix_dh(id):
     return T_id
 
 # Gibt eine Gesamtransformationsmatrix_0_Gelenk für EIN Gelenk aus der kin_chain_list zurueck
-def init_chain_transformationmatrix(id, list_kin_chain):
+def init_chain_transformationmatrix(kin_chain_list, index):
     #Segment aus kin_chain_list abhaengig von ID
-    piece_kin_chain_list=list_kin_chain[id]
+    piece_kin_chain_list=kin_chain_list[index]
     g_T_id = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     for i in range(1, len(piece_kin_chain_list)):
             g_T_id = np.dot(g_T_id, init_transformationmatrix_dh(piece_kin_chain_list[i]))
@@ -117,12 +147,16 @@ def init_chain_transformationmatrix(id, list_kin_chain):
 # Gibt eine Liste aus Gesamtransformationsmatrizen für alle Gelenke zurueck
 def init_entire_transformationmatrices():
     #Ziel: [[MatrixG0], [MatrixG1], [MatrixG2], ...]
-    entire_T_list = [init_chain_transformationmatrix(i, kin_chain_list) for i in range(len(kin_chain_list))]
+    #id_list = [['0'], ['1'], ['1.1'], ['1.1.1'], ['1.1.2'], ['1.2'], ['2']]
+    id_list = [[element] for element in joints]
+    id_list.insert(0, ['0'])
+    #entire_T_list = [init_chain_transformationmatrix(i, kin_chain_list) for i in range(len(kin_chain_list))]
+    entire_T_list = [init_chain_transformationmatrix(kin_chain_list, i) for i in range(len(id_list))]
 
     return entire_T_list
 
 
-def points_coord_system(id, entire_T):
+def points_coord_system(index, entire_T):
 
     ursprung_punkt_show = np.array([[0], [0], [0], [1]])
     x_axis_show = np.array([[0.7], [0], [0], [1]])
@@ -130,10 +164,11 @@ def points_coord_system(id, entire_T):
     z_axis_show = np.array([[0], [0], [0.7], [1]])
 
     #Transformationsmatrix * Punkt = Punkt
-    ursprung_punkt_show = np.dot(entire_T[id], ursprung_punkt_show)
-    x_axis_show = np.dot(entire_T[id], x_axis_show)
-    y_axis_show = np.dot(entire_T[id], y_axis_show)
-    z_axis_show = np.dot(entire_T[id], z_axis_show)
+    #print(entire_T[index])
+    ursprung_punkt_show = np.dot(entire_T[index], ursprung_punkt_show)
+    x_axis_show = np.dot(entire_T[index], x_axis_show)
+    y_axis_show = np.dot(entire_T[index], y_axis_show)
+    z_axis_show = np.dot(entire_T[index], z_axis_show)
 
     #print(f'ursprung_punkt_show_hom {ursprung_punkt_show}')
     ursprung_punkt_show = ursprung_punkt_show[:3, :1]
@@ -146,64 +181,50 @@ def points_coord_system(id, entire_T):
 
     return [ursprung_punkt_show, x_axis_show, y_axis_show, z_axis_show]
 
+#Zuordnung von ID eines Gelenks zum Index in der Liste
+def get_index_id(id):
+    #                   |ab hier gehen die IDs los
+    # id_list = [['0'], ['1'], ['1.1'], ['1.1.1'], ['1.1.2'], ['1.2'], ['2']]
+    id_list = [[element] for element in joints]
+    id_list.insert(0, ['0'])
+    print(f'id_list{id_list}')
+    print(f'id{id}')
+    index = 0
+    for i in range(len(id_list)):
+        if str(id) != str(id_list[i][0]):
+            index += 1
+        else:
+            break
+    return index
 
-
+def get_id_index(index):
+    id_list = [[element] for element in joints]
+    id = id_list[index][0]
+    return id
+#print(f'hier   {str(get_id_index(1))}')
 
 if __name__ == '__main__':
 
-
-    robot_data_dic = jsontoDic('example_robot_dh.json')
-    #print(robot_data_dic)
-    robot_data_dic_backup = robot_data_dic
-
-    #print(robot_data_dic.get('angle'))
-    #print(robot_data_dic.values())
-    ##print(robot_data_dic[0]['angle'])
-    #robot_data_dic[0] = {}
-
-    restructureDic(robot_data_dic)
     kin_chain_list = init_kin_chains()
+    print(f'kin_chain_list: {kin_chain_list}')
 
-    #print(f'T_id: \n {init_transformationmatrix_dh(2)[0]} \n {init_transformationmatrix_dh(2)[1]} \n {init_transformationmatrix_dh(2)[2]} \n {init_transformationmatrix_dh(2)[3]}')
-
-    #A = [[1,2,3],[4,1,3],[5,2,2]]
-    #B = [[3,2,1],[2,4,3],[4,2,3]]
-    #print(np.dot(np.dot(A,B),A)) #A*B*A
-    #print(init_chain_transformationmatrix(2))
-
-    #print(f'g_T_id = {init_chain_transformationmatrix(3)}')
 
     entire_T = init_entire_transformationmatrices()
-    print(f'entire_T = {entire_T}')
-
-    # A = entire_T[0]
-    # print(f'A: {A}')
-    #ursprung_punkt_show = np.array([[0], [0], [0], [1]])
-    # punkt_P = np.array([[0], [0], [0]])
-    # print(f'punkt_P: {punkt_P}')
-    # punkt_P_hom = np.append(punkt_P, [1])
-    # print(f'punkt_P_hom: {punkt_P_hom}')
-    # punkt_P_calc = [punkt_P_hom[0], punkt_P_hom[1], punkt_P_hom[2]]
-    # print(f'punkt_P_calc: {punkt_P_calc}')
-    #print([punkt_P[0, 0], punkt_P[1, 0], punkt_P[1, 0]])
-    # A_show = A[:3, :3]
-    # print(f'A_show:\n {A_show}')
-    # punkt_P_hom = np.array([[0], [0], [0], [1]])
-    # print(f'punkt_P:\n {punkt_P_hom}')
-    # punkt_P_show = punkt_P_hom[:3, :1]
-    # print(f'punkt_P_show:\n {punkt_P_show}')
-
+    print(f'entire_T: {entire_T}')
     fig = plt.figure()
     plt.rcParams['figure.figsize']=(10,20)
     ax = plt.axes(projection='3d')
     #ax = fig.add_subplot(111, projection='3d')
 
+
     # Ursprung Koord 0 ######################################################
 
-    test_ursprung_0 = points_coord_system(0, entire_T)[0]   # ursprung_punkt_show
-    test_ursprung_x_0 = points_coord_system(0, entire_T)[1] # x_axis_show (Punkt für x-Achse)
-    test_ursprung_y_0 = points_coord_system(0, entire_T)[2] # y_axis_show
-    test_ursprung_z_0 = points_coord_system(0, entire_T)[3] # z_axis_show
+    index_Ursprung=get_index_id(0) #0
+
+    test_ursprung_0 = points_coord_system(index_Ursprung, entire_T)[0]   # ursprung_punkt_show
+    test_ursprung_x_0 = points_coord_system(index_Ursprung, entire_T)[1] # x_axis_show (Punkt für x-Achse)
+    test_ursprung_y_0 = points_coord_system(index_Ursprung, entire_T)[2] # y_axis_show
+    test_ursprung_z_0 = points_coord_system(index_Ursprung, entire_T)[3] # z_axis_show
 
     # Plot des Ursprungs und Achsen vom Basiskoordinatensystems
     plt.plot([test_ursprung_0[0, 0]], [test_ursprung_0[1, 0]], [test_ursprung_0[2, 0]], 'wo', label='Ursprung 0',
@@ -219,10 +240,23 @@ if __name__ == '__main__':
              linewidth=2)
     #########################################################################
     # Gelenkurspruenge mit Koordinatenachsen plotten#########################
+
+    #print(f'get_id_index(1){get_id_index(1)}')
+    #print(f'test: {joints[str(get_id_index(1))].get("name")}')
+
     for i in range(1, len(entire_T)):
         # Ursprung
         plt.plot([points_coord_system(i, entire_T)[0][0, 0]], [points_coord_system(i, entire_T)[0][1, 0]],
                  [points_coord_system(i, entire_T)[0][2, 0]], 'k,')
+        # Abbilden der ID im Plot an den Koordinatenurspruengen
+        # ax.text(points_coord_system(i, entire_T)[0][0, 0],
+        #         points_coord_system(i, entire_T)[0][1, 0],
+        #         points_coord_system(i, entire_T)[0][2, 0], str(get_id_index(i-1)))
+        # anstatt ID den angegebenen Namen anzeigen
+        ax.text(points_coord_system(i, entire_T)[0][0, 0],
+                points_coord_system(i, entire_T)[0][1, 0],
+                points_coord_system(i, entire_T)[0][2, 0], str(joints[get_id_index(i - 1)].get("name")))
+
         # # x-Achse
                                 # ursprung_punkt_show[x,0], x_axis_show[x,0]
                                 # ursprung_punkt_show[y,0], x_axis_show[y,0]
@@ -249,27 +283,39 @@ if __name__ == '__main__':
                  'b-', label='z', linewidth=1)
 
     ########################################################################
-    # verbindungslinien der Koordinatensysteme##############################
+    # Verbindungslinien der Koordinatensysteme##############################
     # kin chain Liste zu den jeweiligen Parents
-    kin_chain_list_parent = [[0]]
-    for k in range(1, len(kin_chain_list)):
-        kin_chain_list_parent.append(kin_chain_list[k][0:-1])
+    # kin_chain_list_parent = [[0]]
+    # for k in range(1, len(kin_chain_list)):
+    #     kin_chain_list_parent.append(kin_chain_list[k][0:-1])
+
+
+    kin_chain_list_parent = kin_chain_list
+    print(kin_chain_list_parent)
+    print(f'laenge von index 1: {len(kin_chain_list_parent[1])}')
+    for i in range(1, len(kin_chain_list_parent)):
+        kin_chain_list_parent[i] = kin_chain_list_parent[i][0:-1]
+    print(f'kin_chain_list_parent: {kin_chain_list_parent}')
+
 
     # plot einer Verbindungslinie zwischen dem Ursprung eines Gelenks und dem Ursprung des Parentgelenks
     # berechnung der Transformationsmatrix des Parents für Koordinaten
     for i in range(1, len(entire_T)):
         #Ursprung parent, Ursprung selbst -> verbindungslinie
-        plt.plot([np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[0],points_coord_system(i, entire_T)[0][0, 0]],
-                 [np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[1],points_coord_system(i, entire_T)[0][1, 0]],
-                 [np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[2],points_coord_system(i, entire_T)[0][2, 0]],
-                 'k:', linewidth=0.5)
+        # plt.plot([np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[0],points_coord_system(i, entire_T)[0][0, 0]],
+        #          [np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[1],points_coord_system(i, entire_T)[0][1, 0]],
+        #          [np.dot(init_chain_transformationmatrix(i,kin_chain_list_parent), [[0], [0], [0], [1]])[2],points_coord_system(i, entire_T)[0][2, 0]],
+        #          'k:', linewidth=0.5)
+        plt.plot([np.dot(init_chain_transformationmatrix(kin_chain_list_parent,i),[[0], [0], [0], [1]])[0],points_coord_system(i, entire_T)[0][0, 0]],
+                [np.dot(init_chain_transformationmatrix(kin_chain_list_parent, i), [[0], [0], [0], [1]])[1],points_coord_system(i, entire_T)[0][1, 0]],
+                [np.dot(init_chain_transformationmatrix(kin_chain_list_parent, i), [[0], [0], [0], [1]])[2],points_coord_system(i, entire_T)[0][2, 0]],
+                'k:', linewidth=0.5)
 
     ########################################################################
     # Geometrische Formen im Plotter um die Koordinatensysteme -> je nach Art des Gelenks
     #TODO Unterscheidung der Gelenktypen
 
     # Rotationsgelenk um Z-Achse (DH-Konvention)
-    # Make data
     # u = np.linspace(0, 2 * np.pi, 40)
     # v = np.linspace(0, 2*  np.pi, 40)
 
@@ -277,21 +323,21 @@ if __name__ == '__main__':
     # y = np.outer(np.sin(u), np.sin(v))
     # z = np.outer(np.ones(np.size(u)), np.cos(v))
     scale_cylinder = 0.3
-    #              (start,stop,step)
+    #              (start,stop,Teilungsfaktor)
     u = np.linspace(0, 2 * np.pi, num=20) #num=step für Kreis
     v = np.linspace(0, 3, num=2) #num=step für Hoehe Cylinder (min 2)
     u2 = np.linspace(0, 2*np.pi, 40)
     v2 = np.linspace(0, 2*np.pi, 40)
 
     #                     , np.sin(Durchmesser)
-    # x = np.outer(np.cos(u), np.sin(scale_cylinder))
-    # #                     , np.sin(Durchmesser)
-    # y = np.outer(np.sin(u), np.sin(scale_cylinder))
-    # z = np.outer(np.ones(np.size(u)), np.cos(v))
+    x = np.outer(np.cos(u), np.sin(scale_cylinder))
+    #                     , np.sin(Durchmesser)
+    y = np.outer(np.sin(u), np.sin(scale_cylinder))
+    z = np.outer(np.ones(np.size(u)), np.cos(v))
 
-    x1 = np.outer(np.cos(u), np.sin(v))
-    y2 = np.outer(np.sin(u), np.sin(v))
-    z2 = np.outer(np.ones(np.size(u)), np.cos(v))
+    x1 = np.outer(np.cos(u2), np.sin(v2))
+    y1 = np.outer(np.sin(u2), np.sin(v2))
+    z1 = np.outer(np.zeros(np.size(1)), np.cos(v2))
 
 
     # x1 = np.outer(np.cos(u), np.sin(scale_cylinder))
@@ -299,37 +345,19 @@ if __name__ == '__main__':
     # z1 = np.outer(np.ones(np.size(u)), np.cos(v2))
 
 
-    # Plot the surface
-    # ax.plot_surface(x, y, z, color='k')
+    #Plot the surface
+    ax.plot_surface(x, y, z, color='k')
     #ax.plot_surface(x1,y1,z1, color='b')
     ###
 
 
 
 
-
-
-
-
-
     ########################################################################
-
-
-
-    #alternativ
-    #ax.scatter3D(test_ursprung_0[0, 0], test_ursprung_0[1, 0], test_ursprung_0[2, 0])
-
-    #plt.plot([1, 1, 1], [1, 1, 1], 'go-', label='line 1', linewidth=2)
-    #plt.plot([1], [1], [1], 'go-', label='line 1', linewidth=2)
-
-
-    # plt.gca().set_aspect('equal', adjustable='box')
-
-
     #TODO Variable min und max
-    ax.set_xlim3d([-5, 5])
-    ax.set_ylim3d([-5, 5])
-    ax.set_zlim3d([-5, 5])
+    ax.set_xlim3d([-7, 7])
+    ax.set_ylim3d([-7, 7])
+    ax.set_zlim3d([-7, 7])
 
     plt.show()
 
