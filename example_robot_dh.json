@@ -1,7 +1,7 @@
 {
   "robot": [
     {
-      "name": "Alpha1-Gelenk",
+      "title": "Alpha1-Gelenk",
       "type": "rotation",
       "angle": "1.57078",
       "length": "1.2",
@@ -9,7 +9,7 @@
       "twist": "0",
       "children": [
         {
-          "name": "Beta1-Gelenk",
+          "title": "Beta1-Gelenk",
           "type": "rotation",
           "angle": "0",
           "length": "2.3",
@@ -17,7 +17,7 @@
           "twist": "3.14159",
           "children": [
             {
-              "name": "Gamma1-Gelenk",
+              "title": "Gamma1-Gelenk",
               "type": "rotation",
               "angle": "0",
               "length": "1",
@@ -25,7 +25,7 @@
               "twist": "0.7854"
             },
             {
-              "name": "Gamma1-Gelenk",
+              "title": "Gamma1-Gelenk",
               "type": "rotation",
               "angle": "-1.57078",
               "length": "0.5",
@@ -35,7 +35,7 @@
           ]
         },
         {
-          "name": "Beta2-Gelenk",
+          "title": "Beta2-Gelenk",
           "type": "rotation",
           "angle": "0.7854",
           "length": "1.5",
@@ -45,7 +45,7 @@
       ]
     },
     {
-      "name": "Alpha2-Gelenk",
+      "title": "Alpha2-Gelenk",
       "type": "rotation",
       "angle": "3.14159",
       "length": "2.4",

@@ -40,16 +40,19 @@ def restructure_dic():
 
 
     def build_tree(data_list: list):
-        def _build_tree(data: dict, result: dict = dict(), key: str = "1"):
+        def _build_tree(data: dict, result: dict = dict(), key: str = "1", previous_key: str="0"):
             if 'children' not in data:
                 result[key] = data
-                return
+                result[key]["previous"] = previous_key
+                return key
             else:
                 result[key] = {"angle": data["angle"], "length": data["length"], "offset": data["offset"],
-                               "twist": data["twist"], "name": data["name"], "type": data["type"]}
+                               "twist": data["twist"], "name": data["name"], "type": data["type"], "children": list(),
+                               "previous": previous_key}
                 for index, value in enumerate(data['children']):
                     new_key = f"{key}.{index + 1}"
-                    _build_tree(data=value, result=result, key=new_key)
+                    child_key = _build_tree(data=value, result=result, key=new_key, previous_key=key)
+                    result[key]["children"].append(child_key)
                 return
 
         result = dict()
