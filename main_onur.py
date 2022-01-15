@@ -1,4 +1,5 @@
 from json import load
+from Joint import Joint
 
 # with open("./example_robot_dh.json") as data_json:
 #    data = load(data_json)
@@ -32,7 +33,7 @@ data = {'robot':[{
 
 from dataclasses import dataclass
 
-
+'''
 @dataclass
 class Joint:
     name: str
@@ -44,6 +45,7 @@ class Joint:
     type: str
     children: list
     previous: str
+'''
 
 
 def build_tree(data_list: list):
