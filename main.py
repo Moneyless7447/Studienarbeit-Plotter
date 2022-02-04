@@ -5,7 +5,7 @@ from robot import *
 import json
 from Joint import Joint
 from mpl_toolkits.mplot3d import Axes3D
-
+import os
 
 
 ################################################################
@@ -35,8 +35,8 @@ Ziel: joints = {1: {'name2': '1', 'parent': '0', 'angle': 'np.pi/2', 'length': '
 
 #"angle": "1.57078",
 
-def restructure_dic():
-    with open("./example_robot_dh.json") as data:
+def restructure_dic(filename: str):
+    with open(os.path.join(".", filename)) as data:
         test_data = json.load(data)
 
     '''    def build_tree(data_list: list):
@@ -76,7 +76,7 @@ def restructure_dic():
                 for index, value in enumerate(data['children']):
                     new_key = f"{key}.{index + 1}"
                     child = _build_tree(data=value, result=result, key=new_key, previous_key=key)
-                    parent.children.append(child)
+                    parent.children.append(child.name if child is not None else "")
                 result.append(parent)
                 return
 
@@ -89,100 +89,80 @@ def restructure_dic():
 
     robot = test_data['robot']
     joints = build_tree(robot)
-    print(joints)
     return joints
 
-# joints=restructure_dic()
-# # print(joints["1.1"].get("length"))
+# Liste der nötigen Transformationsmatrizen, um vom Ursprung zu jedem Gelenk transformieren zu können
+def init_kin_chains():
+    """
+    Eine Liste aus Listen für Gelenk 1 bis n mit der kinematischen Kette für das jeweilige Gelenk
+    bis zum Basiskoordinatensystem.
+    Ziel, zu Beispiel B, Index in aeusserer Liste entspricht ID in Dictionary (1-6):
+    kin_chain_list = [[0], [0,1], [0,2], [0,1,3], [0,1,4], [0,1,3,5], [0,1,3,6]]
+    kin_chain_list = [['0'], ['0','1'], ['0','2'], ['0','1','1.1'], ['0','1','1.2'], ['0','1','1.1','1.1.1'], ['0','1','1.1','1.1.2']]
+    """
+
+    # kin_chain_list = [[i] for i in range(len(joints)+1)]
+    kin_chain_list = [[treestructure[i].name] for i in range(len(treestructure))]
+    kin_chain_list.insert(0, ['0'])
+
+    for n in range(1,len(kin_chain_list)):
+        for zeichen in range(len(kin_chain_list[n][-1])-1,-1,-1):
+            if kin_chain_list[n][-1][zeichen] == '.':
+                kin_chain_list[n].insert(0,kin_chain_list[n][-1][0:zeichen])
+
+    for i in range(1, len(kin_chain_list)):
+        kin_chain_list[i].insert(0,'0')
+
+    #kin_chain_list:  [['0'], ['0', '1', '1.1', '1.1.1'], ['0', '1', '1.1', '1.1.2'], ['0', '1', '1.1'], ['0', '1', '1.2'], ['0', '1'], ['0', '2']]
+    print("kin_chain_list: ", kin_chain_list)
+
+    return kin_chain_list
+
+
+
+# Gibt eine Transformationsmatrix nach DH Konvention für T_id-1_id aus Daten von Dictionary joints zurueck
+def init_transformationmatrix_dh(id):
+    #T_id = DH Transformationsmatrix T_id-1_id
+    T_id = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]
+    T_id[0][0] = math.cos(float(treestructure[id].get('angle')))
+    T_id[0][1] = -math.sin(float(joints[id].get('angle')))*math.cos(float(joints[id].get('twist')))
+    T_id[0][2] = math.sin(float(joints[id].get('angle')))*math.sin(float(joints[id].get('twist')))
+    T_id[0][3] = float(joints[id].get('length'))*math.cos(float(joints[id].get('angle')))
+    T_id[1][0] = math.sin(float(joints[id].get('angle')))
+    T_id[1][1] = math.cos(float(joints[id].get('angle'))) * math.cos(float(joints[id].get('twist')))
+    T_id[1][2] = -math.cos(float(joints[id].get('angle'))) * math.sin(float(joints[id].get('twist')))
+    T_id[1][3] = float(joints[id].get('length')) * math.sin(float(joints[id].get('angle')))
+    T_id[2][1] = math.sin(float(joints[id].get('twist')))
+    T_id[2][2] = math.cos(float(joints[id].get('twist')))
+    T_id[2][3] = float(joints[id].get('offset'))
+
+    return T_id
 #
-# # joints = {1: {'name2': '1', 'parent': 0, 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': 0},
-# #           2: {'name2': '1.1', 'parent': 1, 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
-# #           3: {'name2': '2', 'parent': 0, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
-# #           4: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
-# #           5: {'name2': '1.1.1', 'parent': 2, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
-# #           6: {'name2': '1.1.2', 'parent': 2, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
-#
-#
-# # joints = {1: {'name': 'Alpha1-Gelenk', 'type': "rotation", 'angle': np.pi/2, 'length': 1.2, 'offset': 1.3, 'twist': 0},
-# #           1.1: {'name': 'Beta1-Gelenk',"type": "rotation", 'angle': 0, 'length': 2.3, 'offset': 1, 'twist': np.pi},
-# #           2: {, 'angle': np.pi, 'length': 2.4, 'offset': 3, 'twist': 0},
-# #           1.2: {'name2': '1.2', 'parent': 1, 'angle': np.pi/4, 'length': 1.5, 'offset': 0.2, 'twist': -np.pi/4},
-# #           1.1.1: {'name2': '1.1.1', 'parent': 2, 'angle': 0, 'length': 1, 'offset': 3, 'twist': np.pi/4},
-# #           1.1.2: {'name2': '1.1.2', 'parent': 2, 'angle': -np.pi/2, 'length': 0.5, 'offset': 2, 'twist': 0}}
-#
-#
-#
-#
-#
-# # Liste der nötigen Transformationsmatrizen, um vom Ursprung zu jedem Gelenk transformieren zu können
-# def init_kin_chains():
-#     """
-#     Eine Liste aus Listen für Gelenk 1 bis n mit der kinematischen Kette für das jeweilige Gelenk
-#     bis zum Basiskoordinatensystem.
-#     Ziel, zu Beispiel B, Index in aeusserer Liste entspricht ID in Dictionary (1-6):
-#     kin_chain_list = [[0], [0,1], [0,2], [0,1,3], [0,1,4], [0,1,3,5], [0,1,3,6]]
-#     kin_chain_list = [['0'], ['0','1'], ['0','2'], ['0','1','1.1'], ['0','1','1.2'], ['0','1','1.1','1.1.1'], ['0','1','1.1','1.1.2']]
-#     """
-#
-#     # kin_chain_list = [[i] for i in range(len(joints)+1)]
-#     kin_chain_list = [[element] for element in joints]
-#     kin_chain_list.insert(0, ['0'])
-#
-#     for n in range(1,len(kin_chain_list)):
-#         for zeichen in range(len(kin_chain_list[n][-1])-1,-1,-1):
-#             if kin_chain_list[n][-1][zeichen] == '.':
-#                 kin_chain_list[n].insert(0,kin_chain_list[n][-1][0:zeichen])
-#
-#     for i in range(1, len(kin_chain_list)):
-#         kin_chain_list[i].insert(0,'0')
-#
-#     #[['0'], ['1'], ['1.1'], ['1.1.1'], ['1.1.2'], ['1.2'], ['2']]
-#     #[['0'], ['1'], ['1','1.1'], ['1.1.1'], ['1.1.2'], ['1.2'], ['2']]
-#
-#     #print("kin_chain_list: ", kin_chain_list)
-#
-#     return kin_chain_list
-#
-#
-#
-# # Gibt eine Transformationsmatrix nach DH Konvention für T_id-1_id aus Daten von Dictionary joints zurueck
-# def init_transformationmatrix_dh(id):
-#     #T_id = DH Transformationsmatrix T_id-1_id
-#     T_id = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 1]]
-#     T_id[0][0] = math.cos(float(joints[id].get('angle')))
-#     T_id[0][1] = -math.sin(float(joints[id].get('angle')))*math.cos(float(joints[id].get('twist')))
-#     T_id[0][2] = math.sin(float(joints[id].get('angle')))*math.sin(float(joints[id].get('twist')))
-#     T_id[0][3] = float(joints[id].get('length'))*math.cos(float(joints[id].get('angle')))
-#     T_id[1][0] = math.sin(float(joints[id].get('angle')))
-#     T_id[1][1] = math.cos(float(joints[id].get('angle'))) * math.cos(float(joints[id].get('twist')))
-#     T_id[1][2] = -math.cos(float(joints[id].get('angle'))) * math.sin(float(joints[id].get('twist')))
-#     T_id[1][3] = float(joints[id].get('length')) * math.sin(float(joints[id].get('angle')))
-#     T_id[2][1] = math.sin(float(joints[id].get('twist')))
-#     T_id[2][2] = math.cos(float(joints[id].get('twist')))
-#     T_id[2][3] = float(joints[id].get('offset'))
-#
-#     return T_id
-#
-# # Gibt eine Gesamtransformationsmatrix_0_Gelenk für EIN Gelenk aus der kin_chain_list zurueck
-# def init_chain_transformationmatrix(kin_chain_list, index):
-#     #Segment aus kin_chain_list abhaengig von ID
-#     piece_kin_chain_list=kin_chain_list[index]
-#     g_T_id = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-#     for i in range(1, len(piece_kin_chain_list)):
-#             g_T_id = np.dot(g_T_id, init_transformationmatrix_dh(piece_kin_chain_list[i]))
-#
-#     return g_T_id
-#
-# # Gibt eine Liste aus Gesamtransformationsmatrizen für alle Gelenke zurueck
-# def init_entire_transformationmatrices():
-#     #Ziel: [[MatrixG0], [MatrixG1], [MatrixG2], ...]
-#     #id_list = [['0'], ['1'], ['1.1'], ['1.1.1'], ['1.1.2'], ['1.2'], ['2']]
-#     id_list = [[element] for element in joints]
-#     id_list.insert(0, ['0'])
-#     #entire_T_list = [init_chain_transformationmatrix(i, kin_chain_list) for i in range(len(kin_chain_list))]
-#     entire_T_list = [init_chain_transformationmatrix(kin_chain_list, i) for i in range(len(id_list))]
-#
-#     return entire_T_list
+# Gibt eine Gesamtransformationsmatrix_0_Gelenk für EIN Gelenk aus der kin_chain_list zurueck
+def init_chain_transformationmatrix(kin_chain_list, index):
+    #Segment aus kin_chain_list abhaengig von ID
+    piece_kin_chain_list=kin_chain_list[index]
+    print(f"piece_kin_chain_list: {piece_kin_chain_list}")
+    g_T_id = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    for i in range(1, len(piece_kin_chain_list)):
+            g_T_id = np.dot(g_T_id, init_transformationmatrix_dh(piece_kin_chain_list[i]))
+    #
+    # return g_T_id
+
+# Gibt eine Liste aus Gesamtransformationsmatrizen für alle Gelenke zurueck
+def init_entire_transformationmatrices():
+    #Ziel: [[MatrixG0], [MatrixG1], [MatrixG2], ...]
+    #id_list = [['0'], ['1'], ['1.1'], ['1.1.1'], ['1.1.2'], ['1.2'], ['2']]
+    # id_list = [[element] for element in joints]
+    # id_list.insert(0, ['0'])
+    id_list = [[treestructure[i].name] for i in range(len(treestructure))]
+    id_list.insert(0, ['0'])
+    init_chain_transformationmatrix(kin_chain_list, 2)
+    #entire_T_list = [init_chain_transformationmatrix(i, kin_chain_list) for i in range(len(kin_chain_list))]
+    #entire_T_list = [init_chain_transformationmatrix(kin_chain_list, i) for i in range(len(id_list))]
+    #print(entire_T_list)
+    entire_T_list = []
+    return entire_T_list
 #
 #
 # def points_coord_system(index, entire_T):
@@ -231,14 +211,14 @@ def restructure_dic():
 #     id = id_list[index][0]
 #     return id
 # #print(f'hier   {str(get_id_index(1))}')
-
+treestructure = restructure_dic("example_robot_dh.json")
 if __name__ == '__main__':
     print('start')
-    # kin_chain_list = init_kin_chains()
-    # print(f'kin_chain_list: {kin_chain_list}')
-    #
-    #
-    # entire_T = init_entire_transformationmatrices()
+    # treestructure = restructure_dic("example_robot_dh.json")
+    print(f"treestructure: {treestructure}")
+    kin_chain_list = init_kin_chains()
+
+    entire_T = init_entire_transformationmatrices()
     # print(f'entire_T: {entire_T}')
     # fig = plt.figure()
     # plt.rcParams['figure.figsize']=(10,20)
